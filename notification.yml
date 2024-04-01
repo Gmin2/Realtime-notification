@@ -1,0 +1,67 @@
+asyncapi: '2.0.0'
+info:
+  title: Real-time Notification System
+  version: '1.0.0'
+
+servers:
+  production:
+    url: 'wss://example.com/notifications'
+    protocol: 'ws'
+    protocolVersion: '1.0'
+    description: Production server
+
+channels:
+  notification-channel:
+    publish:
+      operationId: sendNotification
+      message:
+        $ref: '#/components/messages/NotificationMessage'
+    subscribe:
+      summary: Subscribe to notifications
+      operationId: receiveNotification
+      message:
+        $ref: '#/components/messages/NotificationMessage'
+      bindingVersion: '1.0'
+      bindings:
+        ws:
+          channelName: '{channel}'
+        websocketsubprotocol: '1.0'
+      parameters:
+        channel:
+          $ref: '#/components/parameters/channelName'
+      security:
+        - bearerAuth: []
+
+components:
+  messages:
+    NotificationMessage:
+      name: NotificationMessage
+      title: Notification Message
+      payload:
+        type: object
+        properties:
+          recipient:
+            type: string
+            description: The recipient of the notification
+          message:
+            type: string
+            description: The notification message
+  parameters:
+    channelName:
+      name: channel
+      description: The name of the notification channel
+      schema:
+        type: string
+      examples:
+        - channel: general
+        - channel: marketing
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+securityDefinitions:
+  bearerAuth:
+    type: apiKey
+    in: header
+    name: Authorization
